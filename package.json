@@ -1,0 +1,12 @@
+{
+  "name": "para-aysah",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Una sorpresa de aniversario para Aysah.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
