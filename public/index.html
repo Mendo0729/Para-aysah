@@ -7,6 +7,108 @@
   <meta name="description" content="Una sorpresa de aniversario hecha con amor para Aysah." />
   <title>Para Aysah 💛</title>
   <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .final-button-wrap {
+      position: relative;
+      z-index: 4;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .final-button {
+      min-width: min(100%, 220px);
+      animation: final-button-pulse 2s ease-in-out infinite;
+    }
+
+    .final-scene {
+      width: min(100%, 760px);
+      margin: 32px auto 0;
+      padding: clamp(24px, 6vw, 48px) 14px;
+      text-align: center;
+      animation: final-scene-in 0.9s ease both;
+    }
+
+    .final-scene .stage-caption {
+      margin-bottom: 20px;
+    }
+
+    .flower-heart {
+      --heart-cell: clamp(24px, 6.8vw, 49px);
+      display: grid;
+      grid-template-columns: repeat(11, var(--heart-cell));
+      justify-content: center;
+      gap: clamp(1px, 0.7vw, 5px);
+      min-height: calc(var(--heart-cell) * 9 + 32px);
+      margin: 0 auto;
+    }
+
+    .heart-flower,
+    .heart-flower-slot {
+      display: grid;
+      place-items: center;
+      width: var(--heart-cell);
+      height: var(--heart-cell);
+    }
+
+    .heart-flower {
+      font-size: calc(var(--heart-cell) * 0.74);
+      opacity: 0;
+      transform: scale(0.08) rotate(-22deg);
+      animation: heart-flower-bloom 0.48s cubic-bezier(.18,.84,.25,1.35) forwards;
+      animation-delay: var(--heart-delay);
+      filter: drop-shadow(0 5px 7px rgba(126, 72, 101, 0.12));
+    }
+
+    .final-message {
+      margin: 26px auto 0;
+      font-family: "Segoe Script", "Brush Script MT", cursive;
+      font-size: clamp(2.35rem, 10vw, 5.2rem);
+      line-height: 1.05;
+      color: #a9577e;
+      text-shadow: 0 5px 0 rgba(255,255,255,0.55);
+      opacity: 0;
+      transform: translateY(14px) scale(0.92);
+    }
+
+    .final-message.show {
+      animation: final-message-in 1s cubic-bezier(.18,.84,.25,1.15) forwards;
+    }
+
+    @keyframes final-button-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.035); }
+    }
+
+    @keyframes final-scene-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes heart-flower-bloom {
+      to { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes final-message-in {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 460px) {
+      .final-scene {
+        margin-top: 20px;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .flower-heart {
+        --heart-cell: calc((100vw - 38px) / 11);
+        gap: 1px;
+      }
+
+      .final-button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="background-glow glow-one"></div>
@@ -44,8 +146,17 @@
         <p>
           Feliz aniversario mi amorcito lindo, gracias por darme los mejores 9 años de mi vida y deseo con todo mi corazón que sean más años felices juntos.
         </p>
+        <div class="final-button-wrap">
+          <button class="primary-button final-button" id="finalButton" type="button">Para finalizar 💗</button>
+        </div>
         <div class="note-heart" aria-hidden="true">♡</div>
       </article>
+
+      <section class="final-scene hidden" id="finalScene" aria-label="Mensaje final de amor">
+        <p class="stage-caption">Y una última cosa...</p>
+        <div class="flower-heart" id="flowerHeart" aria-label="Corazón formado con flores"></div>
+        <div class="final-message" id="finalMessage">Te Amo Mucho</div>
+      </section>
     </section>
   </main>
 
