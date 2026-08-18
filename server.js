@@ -38,21 +38,32 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        res.writeHead(200, { 'Content-Type': MIME_TYPES['.html'] });
+        res.writeHead(200, {
+          'Content-Type': MIME_TYPES['.html'],
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        });
         res.end(data);
       });
       return;
     }
 
     const ext = path.extname(filePath).toLowerCase();
+    const isFrontendCode = ['.html', '.css', '.js'].includes(ext);
+
     res.writeHead(200, {
       'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
-      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600'
+      'Cache-Control': isFrontendCode
+        ? 'no-store, no-cache, must-revalidate, proxy-revalidate'
+        : 'public, max-age=3600',
+      ...(isFrontendCode ? { 'Pragma': 'no-cache', 'Expires': '0' } : {})
     });
+
     fs.createReadStream(filePath).pipe(res);
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Para Aysah disponible en http://localhost:${PORT}`);
 });
