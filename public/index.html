@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f8d9e7" />
+  <meta name="description" content="Una sorpresa de aniversario hecha con amor para Aysah." />
+  <title>Para Aysah 💛</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="background-glow glow-one"></div>
+  <div class="background-glow glow-two"></div>
+  <div class="background-glow glow-three"></div>
+
+  <div class="floating-decor" aria-hidden="true">
+    <span style="--x: 8%; --delay: 0s; --duration: 8s;">♡</span>
+    <span style="--x: 18%; --delay: 2s; --duration: 10s;">✿</span>
+    <span style="--x: 32%; --delay: 1s; --duration: 9s;">♡</span>
+    <span style="--x: 48%; --delay: 4s; --duration: 11s;">✦</span>
+    <span style="--x: 62%; --delay: 3s; --duration: 9s;">✿</span>
+    <span style="--x: 76%; --delay: 5s; --duration: 12s;">♡</span>
+    <span style="--x: 90%; --delay: 1.5s; --duration: 10s;">✦</span>
+  </div>
+
+  <main class="app-shell">
+    <section class="hero" id="hero" aria-live="polite">
+      <div class="mini-label">una sorpresa hecha con amor</div>
+      <h1>Para Aysah</h1>
+      <p class="hero-subtitle">Nueve años, nueve girasoles y muchísimas razones para sonreír.</p>
+
+      <div class="countdown-stage hidden" id="countdownStage">
+        <p class="stage-caption">Tu sorpresa florece en...</p>
+        <div class="flower-number" id="flowerNumber" aria-label="Cuenta regresiva"></div>
+      </div>
+
+      <div class="garden-stage hidden" id="gardenStage">
+        <p class="stage-caption garden-caption">Nueve girasoles por nuestros nueve años 🌻</p>
+        <div class="garden" id="garden" aria-label="Nueve girasoles animados"></div>
+      </div>
+
+      <article class="love-note hidden" id="loveNote">
+        <div class="note-sparkle">✦</div>
+        <p>
+          Feliz aniversario mi amorcito lindo, gracias por darme los mejores 9 años de mi vida y deseo con todo mi corazón que sean más años felices juntos.
+        </p>
+        <div class="note-heart" aria-hidden="true">♡</div>
+      </article>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <section class="modal-card" id="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-flower" aria-hidden="true">🌻</div>
+      <p class="modal-step" id="modalStep">Sorpresa 1 de 3</p>
+      <h2 id="modalTitle">¿Eres Aysah, la futura esposa de Abdiel?</h2>
+      <p id="modalText">Esta página tiene una sorpresa reservada para una persona muy especial.</p>
+      <div class="modal-actions" id="modalActions">
+        <button class="primary-button" id="primaryButton" type="button">Sí, soy yo 💗</button>
+        <button class="secondary-button" id="secondaryButton" type="button">No 🤭</button>
+      </div>
+      <p class="playful-message" id="playfulMessage" aria-live="polite"></p>
+    </section>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
