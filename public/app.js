@@ -11,6 +11,10 @@ const flowerNumber = document.getElementById('flowerNumber');
 const gardenStage = document.getElementById('gardenStage');
 const garden = document.getElementById('garden');
 const loveNote = document.getElementById('loveNote');
+const finalButton = document.getElementById('finalButton');
+const finalScene = document.getElementById('finalScene');
+const flowerHeart = document.getElementById('flowerHeart');
+const finalMessage = document.getElementById('finalMessage');
 
 const steps = [
   {
@@ -58,8 +62,21 @@ const numberPatterns = {
   ]
 };
 
+const heartPattern = [
+  '00110001100',
+  '01111011110',
+  '11111111111',
+  '11111111111',
+  '01111111110',
+  '00111111100',
+  '00011111000',
+  '00001110000',
+  '00000100000'
+];
+
 let currentStep = 0;
 let playfulAttempts = 0;
+let finaleStarted = false;
 
 function animateModalSwap() {
   modalCard.classList.remove('swap');
@@ -149,6 +166,31 @@ function buildGarden() {
   }
 }
 
+function buildFlowerHeart() {
+  flowerHeart.innerHTML = '';
+  const flowerTypes = ['🌸', '🌼', '🌷', '🌻'];
+  let flowerIndex = 0;
+
+  heartPattern.forEach((row) => {
+    [...row].forEach((cell) => {
+      const slot = document.createElement('span');
+
+      if (cell === '1') {
+        slot.className = 'heart-flower';
+        slot.textContent = flowerTypes[flowerIndex % flowerTypes.length];
+        slot.style.setProperty('--heart-delay', `${flowerIndex * 42}ms`);
+        flowerIndex += 1;
+      } else {
+        slot.className = 'heart-flower-slot';
+      }
+
+      flowerHeart.appendChild(slot);
+    });
+  });
+
+  return flowerIndex;
+}
+
 function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -174,6 +216,21 @@ async function startSurprise() {
   loveNote.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+async function startFinale() {
+  if (finaleStarted) return;
+  finaleStarted = true;
+  finalButton.disabled = true;
+
+  loveNote.classList.add('hidden');
+  gardenStage.classList.add('hidden');
+  finalScene.classList.remove('hidden');
+  finalScene.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  const flowerCount = buildFlowerHeart();
+  await wait(flowerCount * 42 + 700);
+  finalMessage.classList.add('show');
+}
+
 primaryButton.addEventListener('click', () => {
   if (currentStep < steps.length - 1) {
     currentStep += 1;
@@ -193,5 +250,7 @@ secondaryButton.addEventListener('click', () => {
   ];
   playfulMessage.textContent = messages[Math.min(playfulAttempts - 1, messages.length - 1)];
 });
+
+finalButton.addEventListener('click', startFinale);
 
 renderStep(0);
