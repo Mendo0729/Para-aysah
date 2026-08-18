@@ -39,27 +39,9 @@ const steps = [
 ];
 
 const numberPatterns = {
-  3: [
-    '1111',
-    '0001',
-    '0111',
-    '0001',
-    '1111'
-  ],
-  2: [
-    '1111',
-    '0001',
-    '1111',
-    '1000',
-    '1111'
-  ],
-  1: [
-    '0010',
-    '0110',
-    '0010',
-    '0010',
-    '0111'
-  ]
+  3: ['1111', '0001', '0111', '0001', '1111'],
+  2: ['1111', '0001', '1111', '1000', '1111'],
+  1: ['0010', '0110', '0010', '0010', '0111']
 };
 
 const heartPattern = [
@@ -75,7 +57,6 @@ const heartPattern = [
 ];
 
 let currentStep = 0;
-let playfulAttempts = 0;
 let finaleStarted = false;
 
 function animateModalSwap() {
@@ -242,13 +223,7 @@ primaryButton.addEventListener('click', () => {
 });
 
 secondaryButton.addEventListener('click', () => {
-  playfulAttempts += 1;
-  const messages = [
-    'Mmm… entonces esta sorpresa no puede abrirse todavía 🤭',
-    'Pista: si eres la persona que Abdiel llama amorcito, sí eres tú 💗',
-    'El girasol guardián insiste en que esta página es para Aysah 🌻'
-  ];
-  playfulMessage.textContent = messages[Math.min(playfulAttempts - 1, messages.length - 1)];
+  playfulMessage.textContent = 'Si eres Aysah, solo puedes presionar Sí 💗';
 });
 
 finalButton.addEventListener('click', startFinale);
