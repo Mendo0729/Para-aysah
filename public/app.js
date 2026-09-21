@@ -1,231 +1,200 @@
-const modalBackdrop = document.getElementById('modalBackdrop');
-const modalCard = document.getElementById('modalCard');
-const modalStep = document.getElementById('modalStep');
-const modalTitle = document.getElementById('modalTitle');
-const modalText = document.getElementById('modalText');
-const primaryButton = document.getElementById('primaryButton');
-const secondaryButton = document.getElementById('secondaryButton');
-const playfulMessage = document.getElementById('playfulMessage');
-const countdownStage = document.getElementById('countdownStage');
-const flowerNumber = document.getElementById('flowerNumber');
-const gardenStage = document.getElementById('gardenStage');
-const garden = document.getElementById('garden');
-const loveNote = document.getElementById('loveNote');
-const finalButton = document.getElementById('finalButton');
-const finalScene = document.getElementById('finalScene');
-const flowerHeart = document.getElementById('flowerHeart');
-const finalMessage = document.getElementById('finalMessage');
+const introScreen = document.getElementById('introScreen');
+const gardenScreen = document.getElementById('gardenScreen');
+const startButton = document.getElementById('startButton');
+const gardenHeader = document.getElementById('gardenHeader');
+const flowerField = document.getElementById('flowerField');
+const progressText = document.getElementById('progressText');
+const progressFill = document.getElementById('progressFill');
+const tapHint = document.getElementById('tapHint');
+const secretMessage = document.getElementById('secretMessage');
+const celebrationLayer = document.getElementById('celebrationLayer');
 
-const steps = [
-  {
-    step: 'Sorpresa 1 de 3',
-    title: '¿Eres Aysah, la futura esposa de Abdiel?',
-    text: 'Esta página tiene una sorpresa reservada para una persona muy especial.',
-    primary: 'Sí, soy yo 💗',
-    secondary: 'No 🤭'
-  },
-  {
-    step: 'Sorpresa 2 de 3',
-    title: 'Pues Abdiel ha preparado una sorpresa para ti',
-    text: 'La hizo pensando en ustedes, en lo vivido y en todo lo bonito que todavía falta por vivir.',
-    primary: 'Quiero verla ✨'
-  },
-  {
-    step: 'Sorpresa 3 de 3',
-    title: '¿Estás lista?',
-    text: 'Entonces mira con atención… esto va a florecer.',
-    primary: 'Sí, estoy lista 🌻'
-  }
-];
+const FLOWERS_TO_REVEAL = 58;
+const FLOWERS_PER_TAP_MIN = 2;
+const FLOWERS_PER_TAP_MAX = 4;
 
-const numberPatterns = {
-  3: ['1111', '0001', '0111', '0001', '1111'],
-  2: ['1111', '0001', '1111', '1000', '1111'],
-  1: ['0010', '0110', '0010', '0010', '0111']
-};
+let flowerCount = 0;
+let experienceStarted = false;
+let revealed = false;
+let celebrationTimer = null;
 
-const heartPattern = [
-  '00110001100',
-  '01111011110',
-  '11111111111',
-  '11111111111',
-  '01111111110',
-  '00111111100',
-  '00011111000',
-  '00001110000',
-  '00000100000'
-];
-
-let currentStep = 0;
-let finaleStarted = false;
-
-function animateModalSwap() {
-  modalCard.classList.remove('swap');
-  void modalCard.offsetWidth;
-  modalCard.classList.add('swap');
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
-function renderStep(index) {
-  const step = steps[index];
-  animateModalSwap();
-  modalStep.textContent = step.step;
-  modalTitle.textContent = step.title;
-  modalText.textContent = step.text;
-  primaryButton.textContent = step.primary;
-  playfulMessage.textContent = '';
+function randomBetween(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
-  if (step.secondary) {
-    secondaryButton.textContent = step.secondary;
-    secondaryButton.classList.remove('hidden');
-  } else {
-    secondaryButton.classList.add('hidden');
+function updateProgress() {
+  const percentage = Math.min(100, Math.round((flowerCount / FLOWERS_TO_REVEAL) * 100));
+  progressText.textContent = percentage + '%';
+  progressFill.style.width = percentage + '%';
+
+  if (percentage >= 100 && !revealed) {
+    revealSecret();
   }
 }
 
-function renderFlowerNumber(number) {
-  const pattern = numberPatterns[number];
-  flowerNumber.innerHTML = '';
-  flowerNumber.style.gridTemplateColumns = `repeat(${pattern[0].length}, var(--cell))`;
-  flowerNumber.setAttribute('aria-label', String(number));
-
-  let bloomIndex = 0;
-  pattern.forEach((row) => {
-    [...row].forEach((cell) => {
-      const slot = document.createElement('span');
-      if (cell === '1') {
-        slot.className = 'count-flower';
-        slot.textContent = bloomIndex % 2 === 0 ? '🌸' : '🌼';
-        slot.style.animationDelay = `${bloomIndex * 35}ms`;
-        bloomIndex += 1;
-      }
-      flowerNumber.appendChild(slot);
-    });
-  });
+function createPetal(index) {
+  const petal = document.createElement('span');
+  petal.className = 'petal';
+  petal.style.setProperty('--petal-index', index);
+  return petal;
 }
 
-function createSunflower(index) {
+function createFlower(x, y, delay = 0) {
   const flower = document.createElement('div');
-  flower.className = 'sunflower';
-  flower.style.setProperty('--i', index);
+  const isDaisy = Math.random() > 0.62;
 
-  const heights = [172, 210, 188, 230, 202, 222, 184, 214, 176];
-  const scales = [0.9, 1, 0.92, 1.08, 0.98, 1.04, 0.92, 1, 0.9];
-  flower.style.setProperty('--stem-height', `${heights[index]}px`);
-  flower.style.setProperty('--flower-scale', scales[index]);
+  flower.className = 'flower' + (isDaisy ? ' is-daisy' : '');
+  flower.style.left = x + 'px';
+  flower.style.top = y + 'px';
+  flower.style.setProperty('--scale', randomBetween(0.68, 1.08).toFixed(2));
+  flower.style.setProperty('--stem', Math.round(randomBetween(72, 126)) + 'px');
+  flower.style.setProperty('--sway-delay', (-Math.random() * 3).toFixed(2) + 's');
+  flower.style.opacity = '0';
 
-  const stem = document.createElement('div');
+  const stem = document.createElement('span');
   stem.className = 'stem';
 
-  const leftLeaf = document.createElement('div');
-  leftLeaf.className = 'leaf left';
+  const leafLeft = document.createElement('span');
+  leafLeft.className = 'leaf leaf-left';
 
-  const rightLeaf = document.createElement('div');
-  rightLeaf.className = 'leaf right';
+  const leafRight = document.createElement('span');
+  leafRight.className = 'leaf leaf-right';
 
-  const head = document.createElement('div');
-  head.className = 'flower-head';
+  const head = document.createElement('span');
+  head.className = 'head';
 
-  for (let petalIndex = 0; petalIndex < 12; petalIndex += 1) {
-    const petal = document.createElement('span');
-    petal.className = 'petal';
-    petal.style.setProperty('--petal', petalIndex);
-    head.appendChild(petal);
+  for (let index = 0; index < 12; index += 1) {
+    head.appendChild(createPetal(index));
   }
 
   const center = document.createElement('span');
-  center.className = 'flower-center';
+  center.className = 'center';
   head.appendChild(center);
 
-  flower.append(stem, leftLeaf, rightLeaf, head);
+  flower.append(stem, leafLeft, leafRight, head);
+
+  window.setTimeout(() => {
+    flower.style.opacity = '1';
+  }, delay);
+
   return flower;
 }
 
-function buildGarden() {
-  garden.innerHTML = '';
-  for (let index = 0; index < 9; index += 1) {
-    garden.appendChild(createSunflower(index));
+function plantFlowers(clientX, clientY) {
+  if (!experienceStarted || revealed) return;
+
+  const rect = gardenScreen.getBoundingClientRect();
+  const localX = clientX - rect.left;
+  const localY = clientY - rect.top;
+
+  const safeTop = Math.max(150, rect.height * 0.25);
+  const safeBottom = rect.height - 18;
+  const safeY = clamp(localY, safeTop, safeBottom);
+
+  const amount = Math.floor(randomBetween(FLOWERS_PER_TAP_MIN, FLOWERS_PER_TAP_MAX + 1));
+
+  for (let index = 0; index < amount; index += 1) {
+    const offsetX = randomBetween(-54, 54);
+    const offsetY = randomBetween(-28, 30);
+    const x = clamp(localX + offsetX, 26, rect.width - 26);
+    const y = clamp(safeY + offsetY, safeTop, safeBottom);
+
+    flowerField.appendChild(createFlower(x, y, index * 80));
+    flowerCount += 1;
+
+    if (flowerCount >= FLOWERS_TO_REVEAL) {
+      break;
+    }
   }
+
+  tapHint.classList.add('is-hidden');
+  updateProgress();
 }
 
-function buildFlowerHeart() {
-  flowerHeart.innerHTML = '';
-  const flowerTypes = ['🌸', '🌼', '🌷', '🌻'];
-  let flowerIndex = 0;
+function plantStarterFlowers() {
+  const rect = gardenScreen.getBoundingClientRect();
+  const starters = [
+    [0.07, 0.88],
+    [0.18, 0.93],
+    [0.82, 0.92],
+    [0.93, 0.86]
+  ];
 
-  heartPattern.forEach((row) => {
-    [...row].forEach((cell) => {
-      const slot = document.createElement('span');
-
-      if (cell === '1') {
-        slot.className = 'heart-flower';
-        slot.textContent = flowerTypes[flowerIndex % flowerTypes.length];
-        slot.style.setProperty('--heart-delay', `${flowerIndex * 42}ms`);
-        flowerIndex += 1;
-      } else {
-        slot.className = 'heart-flower-slot';
-      }
-
-      flowerHeart.appendChild(slot);
-    });
+  starters.forEach(([xRatio, yRatio], index) => {
+    flowerField.appendChild(
+      createFlower(rect.width * xRatio, rect.height * yRatio, 180 + index * 120)
+    );
   });
-
-  return flowerIndex;
 }
 
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function startExperience() {
+  if (experienceStarted) return;
+  experienceStarted = true;
+
+  introScreen.classList.remove('is-active');
+  gardenScreen.classList.add('is-active');
+
+  window.setTimeout(plantStarterFlowers, 420);
 }
 
-async function startSurprise() {
-  modalBackdrop.classList.add('is-closing');
-  await wait(480);
-  modalBackdrop.classList.add('hidden');
+function createCelebrationItem() {
+  if (!revealed) return;
 
-  countdownStage.classList.remove('hidden');
+  const item = document.createElement('span');
+  item.className = 'celebration-item';
+  item.textContent = Math.random() > 0.46 ? '💛' : '🌼';
+  item.style.left = randomBetween(3, 97).toFixed(1) + '%';
+  item.style.setProperty('--size', randomBetween(18, 31).toFixed(0) + 'px');
+  item.style.setProperty('--fall-time', randomBetween(5.5, 8.5).toFixed(2) + 's');
+  celebrationLayer.appendChild(item);
 
-  for (const number of [3, 2, 1]) {
-    renderFlowerNumber(number);
-    await wait(1250);
+  window.setTimeout(() => item.remove(), 9000);
+}
+
+function startCelebration() {
+  for (let index = 0; index < 18; index += 1) {
+    window.setTimeout(createCelebrationItem, index * 120);
   }
 
-  countdownStage.classList.add('hidden');
-  gardenStage.classList.remove('hidden');
-  buildGarden();
-
-  await wait(9 * 230 + 1550);
-  loveNote.classList.remove('hidden');
-  loveNote.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  celebrationTimer = window.setInterval(createCelebrationItem, 520);
+  window.setTimeout(() => {
+    if (celebrationTimer) {
+      clearInterval(celebrationTimer);
+      celebrationTimer = null;
+    }
+  }, 12000);
 }
 
-async function startFinale() {
-  if (finaleStarted) return;
-  finaleStarted = true;
-  finalButton.disabled = true;
+function revealSecret() {
+  if (revealed) return;
+  revealed = true;
 
-  loveNote.classList.add('hidden');
-  gardenStage.classList.add('hidden');
-  finalScene.classList.remove('hidden');
-  finalScene.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  progressText.textContent = '100%';
+  progressFill.style.width = '100%';
+  gardenHeader.classList.add('is-done');
+  tapHint.classList.add('is-hidden');
 
-  const flowerCount = buildFlowerHeart();
-  await wait(flowerCount * 42 + 700);
-  finalMessage.classList.add('show');
+  window.setTimeout(() => {
+    secretMessage.setAttribute('aria-hidden', 'false');
+    secretMessage.classList.add('is-visible');
+    startCelebration();
+  }, 650);
 }
 
-primaryButton.addEventListener('click', () => {
-  if (currentStep < steps.length - 1) {
-    currentStep += 1;
-    renderStep(currentStep);
+function handleGardenPointer(event) {
+  const target = event.target;
+  if (target.closest('.garden-header') || target.closest('.secret-message')) {
     return;
   }
 
-  startSurprise();
-});
+  plantFlowers(event.clientX, event.clientY);
+}
 
-secondaryButton.addEventListener('click', () => {
-  playfulMessage.textContent = 'Si eres Aysah, solo puedes presionar Sí 💗';
-});
+startButton.addEventListener('click', startExperience);
+gardenScreen.addEventListener('pointerdown', handleGardenPointer);
 
-finalButton.addEventListener('click', startFinale);
-
-renderStep(0);
+updateProgress();
